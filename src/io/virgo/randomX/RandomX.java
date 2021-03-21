@@ -20,7 +20,7 @@ public class RandomX {
 	
 	private int flags = 0;
 	
-	private RandomX(Builder builder) {
+	private RandomX(Builder builder) {	
 		
 		flags = builder.flags;
 		if(flags == 0)
@@ -124,4 +124,5 @@ public class RandomX {
 		}
 		
 	}
+	
 }
