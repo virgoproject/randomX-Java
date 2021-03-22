@@ -9,6 +9,7 @@ import java.nio.file.StandardCopyOption;
 import com.ochafik.lang.jnaerator.runtime.NativeSize;
 import com.sun.jna.Library;
 import com.sun.jna.Native;
+import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.PointerByReference;
 
@@ -32,6 +33,17 @@ interface Bindings extends Library {
 	void randomx_destroy_vm(PointerByReference machine);
 
 	void randomx_vm_set_cache(PointerByReference machine, PointerByReference cache);
+	
+	PointerByReference randomx_alloc_dataset(int flags);
+	
+	NativeLong randomx_dataset_item_count();
+	
+	void randomx_init_dataset(PointerByReference dataset, PointerByReference cache, NativeLong startItem, NativeLong itemCount);
+
+	void randomx_release_dataset(PointerByReference dataset);
+
+	void randomx_vm_set_dataset(PointerByReference machine, PointerByReference dataset);
+
 	
 	private static Bindings loadLib() {
 		String name = System.mapLibraryName(JNA_LIBRARY_NAME); // extends name with .dll, .so or .dylib
