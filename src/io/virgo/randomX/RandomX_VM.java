@@ -15,7 +15,7 @@ public class RandomX_VM {
 		this.parent = parent;
 	}
 	
-	public byte[] getHash(byte[] message) {
+	public synchronized byte[] getHash(byte[] message) {
 		
 		Pointer msgPointer = new Memory(message.length);
 		msgPointer.write(0, message, 0, message.length);

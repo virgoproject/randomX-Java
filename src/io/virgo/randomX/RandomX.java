@@ -58,16 +58,18 @@ public class RandomX {
 		if(this.key != null && Arrays.equals(key, this.key.getByteArray(0, keySize)))
 			return;
 		
-		if(cache != null)
-			Bindings.INSTANCE.randomx_release_cache(cache);
-
-		cache = Bindings.INSTANCE.randomx_alloc_cache(flagsValue);
+		PointerByReference newCache = Bindings.INSTANCE.randomx_alloc_cache(flagsValue);
 		
 		this.key = new Memory(key.length);
 		this.key.write(0, key, 0, key.length);
 		keySize = key.length;
 		
-		Bindings.INSTANCE.randomx_init_cache(cache, this.key, new NativeSize(key.length));
+		Bindings.INSTANCE.randomx_init_cache(newCache, this.key, new NativeSize(key.length));
+		
+		if(cache != null)
+			Bindings.INSTANCE.randomx_release_cache(cache);
+		
+		cache = newCache;
 	}
 	
 	private void setDataSet(byte[] key) {
@@ -76,13 +78,12 @@ public class RandomX {
 		
 		setCache(key);
 		
-		if(dataset != null)
-			Bindings.INSTANCE.randomx_release_dataset(dataset);
+		PointerByReference newDataset;
 		
 		if(flags.contains(Flag.LARGE_PAGES))
-			dataset = Bindings.INSTANCE.randomx_alloc_dataset(Flag.LARGE_PAGES.getValue());
+			newDataset = Bindings.INSTANCE.randomx_alloc_dataset(Flag.LARGE_PAGES.getValue());
 		else
-			dataset = Bindings.INSTANCE.randomx_alloc_dataset(0);
+			newDataset = Bindings.INSTANCE.randomx_alloc_dataset(0);
 		
 		if(fastInit) {
 			
@@ -100,7 +101,7 @@ public class RandomX {
 
 					@Override
 					public void run() {
-						Bindings.INSTANCE.randomx_init_dataset(dataset, cache, new NativeLong(start), new NativeLong(count));
+						Bindings.INSTANCE.randomx_init_dataset(newDataset, cache, new NativeLong(start), new NativeLong(count));
 					}
 					
 				});
@@ -115,10 +116,16 @@ public class RandomX {
 					thread.join();
 				} catch (InterruptedException e) {}
 			
-		}else Bindings.INSTANCE.randomx_init_dataset(dataset, cache, new NativeLong(0), Bindings.INSTANCE.randomx_dataset_item_count());
+		}else Bindings.INSTANCE.randomx_init_dataset(newDataset, cache, new NativeLong(0), Bindings.INSTANCE.randomx_dataset_item_count());
 		
 		
 		Bindings.INSTANCE.randomx_release_cache(cache);
+		cache = null;
+		
+		if(dataset != null)
+			Bindings.INSTANCE.randomx_release_dataset(dataset);
+		
+		dataset = newDataset;
 	}
 	
 	public void changeKey(byte[] key) {

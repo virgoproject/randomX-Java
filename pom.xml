@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>RandomX_java</groupId>
   <artifactId>RandomX_java</artifactId>
-  <version>0.0.2</version>
+  <version>0.0.4</version>
   <build>
     <sourceDirectory>src</sourceDirectory>
     <plugins>
@@ -35,6 +35,7 @@
         <resource>
             <directory>${project.build.sourceDirectory}</directory>
             <includes>
+            	<include>**/*.java</include>
                 <include>**/*.dll</include>
                 <include>**/*.so</include>
             </includes>
