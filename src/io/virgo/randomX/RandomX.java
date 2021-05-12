@@ -33,9 +33,22 @@ public class RandomX {
 		flags = builder.flags;
 		if(flags.size() == 0)
 			flagsValue = Bindings.INSTANCE.randomx_get_flags();	
-		else
-			for(Flag flag : flags)
-				flagsValue+=flag.getValue();
+		else {
+			if(builder.recommendedFlags) {
+				flagsValue = Bindings.INSTANCE.randomx_get_flags();
+				
+				//Add flags not included by randomx_get_flags if present in flags list
+				if(flags.contains(Flag.FULL_MEM))
+					flagsValue+=Flag.FULL_MEM.value;
+				if(flags.contains(Flag.LARGE_PAGES))
+					flagsValue+=Flag.LARGE_PAGES.value;
+				if(flags.contains(Flag.SECURE))
+					flagsValue+=Flag.SECURE.value;
+				
+			}else
+				for(Flag flag : flags)
+					flagsValue += flag.value;
+		}
 		
 	}
 
@@ -164,6 +177,7 @@ public class RandomX {
 	
 	public static class Builder {
 		
+		private boolean recommendedFlags = false;
 		private ArrayList<Flag> flags = new ArrayList<Flag>();
 
 		private boolean fastInit = false;
@@ -174,6 +188,11 @@ public class RandomX {
 		
 		public Builder fastInit(boolean value) {
 			fastInit = value;
+			return this;
+		}
+		
+		public Builder recommendedFlags() {
+			recommendedFlags = true;
 			return this;
 		}
 		
@@ -200,8 +219,6 @@ public class RandomX {
 		Flag(int value){
 			this.value = value;
 		}
-
-		
 		
 		public int getValue() {
 			return value;
