@@ -9,6 +9,9 @@ import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.PointerByReference;
 
+/**
+ * Java wrapper for RandomX proof of work library
+ */
 public class RandomX {
 	
 	public static final int HASH_SIZE = 32;
@@ -26,6 +29,9 @@ public class RandomX {
 	private int flagsValue = 0;
 	private ArrayList<Flag> flags;
 	
+	/**
+	 * Create a randomX instance using builder provided informations
+	 */
 	private RandomX(Builder builder) {	
 		
 		fastInit = builder.fastInit;
@@ -52,6 +58,10 @@ public class RandomX {
 		
 	}
 
+	/**
+	 * Initialize randomX cache or dataset for a specific key
+	 * @param key The key to initialize randomX with. (generally a hash)
+	 */
 	public void init(byte[] key) {
 		
 		if(flags.contains(Flag.FULL_MEM))
@@ -61,12 +71,21 @@ public class RandomX {
 		
 	}
 	
+	/**
+	 * Create a new VM for the current randomX instance
+	 * RandomX must be initialized before calling this.
+	 * @return RandomX_VM an Object representing the resulting VM
+	 */
 	public RandomX_VM createVM() {
 		RandomX_VM vm = new RandomX_VM(Bindings.INSTANCE.randomx_create_vm(flagsValue, cache, dataset), this);
 		vms.add(vm);
 		return vm;
 	}
 	
+	/**
+	 * Initialize randomX cache for a specific key
+	 * @param key The key to initialize randomX with. (generally a hash)
+	 */
 	private void setCache(byte[] key) {
 		if(this.key != null && Arrays.equals(key, this.key.getByteArray(0, keySize)))
 			return;
@@ -85,21 +104,30 @@ public class RandomX {
 		cache = newCache;
 	}
 	
+	/**
+	 * Initialize randomX dataset for a specific key
+	 * @param key The key to initialize randomX with. (generally a hash)
+	 */
 	private void setDataSet(byte[] key) {
 		if(this.key != null && Arrays.equals(key, this.key.getByteArray(0, keySize)))
 			return;
 		
+		//Initialized cache is required to create dataset, first initialize it
 		setCache(key);
 		
 		PointerByReference newDataset;
 		
+		//Allocate memory for dataset
 		if(flags.contains(Flag.LARGE_PAGES))
 			newDataset = Bindings.INSTANCE.randomx_alloc_dataset(Flag.LARGE_PAGES.getValue());
 		else
 			newDataset = Bindings.INSTANCE.randomx_alloc_dataset(0);
 		
 		if(fastInit) {
-			
+			/*
+			 * If fastInit enabled use all cores to create the dataset
+			 * by equally distributing work between them
+			 */
 			ArrayList<Thread> threads = new ArrayList<Thread>();
 			int threadCount = Runtime.getRuntime().availableProcessors();
 			
@@ -131,16 +159,21 @@ public class RandomX {
 			
 		}else Bindings.INSTANCE.randomx_init_dataset(newDataset, cache, new NativeLong(0), Bindings.INSTANCE.randomx_dataset_item_count());
 		
-		
+		//Release the cache that was used to create the dataset
 		Bindings.INSTANCE.randomx_release_cache(cache);
 		cache = null;
 		
+		//If there is a old dataset release it before remplacing by the new one
 		if(dataset != null)
 			Bindings.INSTANCE.randomx_release_dataset(dataset);
 		
 		dataset = newDataset;
 	}
 	
+	/**
+	 * Change current randomX key by reinitializing dataset or cache
+	 * @param key The key to initialize randomX with. (generally a hash)
+	 */
 	public void changeKey(byte[] key) {
 				
 		if(flags.contains(Flag.FULL_MEM)) {
@@ -155,6 +188,9 @@ public class RandomX {
 		
 	}
 	
+	/**
+	 * Destroy all VMs and clear cache and dataset 
+	 */
 	public void destroy() {
 
 		for(RandomX_VM vm : vms) {
@@ -175,6 +211,20 @@ public class RandomX {
 
 	}
 	
+	/**
+	 * New RandomX instance builder
+	 * 
+	 * <p>
+	 * Example:<br><br>
+	 * {@code RandomX randomX = new RandomX.Builder()}<br>
+	 * {@code .build();}
+	 * 
+	 * {@code randomX.init(hash);}
+	 * {@code RandomX_VM vm = randomX.createVM();}
+	 * {@code byte[] hash = vm.getHash(bytes);}
+	 * <p>
+	 * 
+	 */
 	public static class Builder {
 		
 		private boolean recommendedFlags = false;

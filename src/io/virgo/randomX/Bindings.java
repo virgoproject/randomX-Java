@@ -13,6 +13,9 @@ import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.PointerByReference;
 
+/**
+ * JNA wrapping to the randomX native library
+ */
 interface Bindings extends Library {
 
 	public static final String JNA_LIBRARY_NAME = "randomx";
@@ -44,7 +47,9 @@ interface Bindings extends Library {
 
 	void randomx_vm_set_dataset(PointerByReference machine, PointerByReference dataset);
 
-	
+	/**
+	 * Extract library from jar to lib/ directory then load it
+	 */
 	private static Bindings loadLib() {
 		String name = System.mapLibraryName(JNA_LIBRARY_NAME); // extends name with .dll, .so or .dylib
 		File extractedLib = new File("lib/"+name);

@@ -43,13 +43,11 @@
     </resources>
   </build>
   <dependencies>
-	<!-- https://mvnrepository.com/artifact/net.java.dev.jna/jna -->
 	<dependency>
 		<groupId>net.java.dev.jna</groupId>
 		<artifactId>jna</artifactId>
 		<version>5.7.0</version>
 	</dependency>
-	<!-- https://mvnrepository.com/artifact/com.nativelibs4java/jnaerator-runtime -->
 	<dependency>
 	    <groupId>com.nativelibs4java</groupId>
 	    <artifactId>jnaerator-runtime</artifactId>

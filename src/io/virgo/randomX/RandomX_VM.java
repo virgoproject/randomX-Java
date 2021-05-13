@@ -5,6 +5,9 @@ import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.PointerByReference;
 
+/*
+ * RandomX virtual machine, uses dataset to calculate hashes
+ */
 public class RandomX_VM {
 
 	PointerByReference pointer;
@@ -15,6 +18,11 @@ public class RandomX_VM {
 		this.parent = parent;
 	}
 	
+	/**
+	 * Calculate hash of given message
+	 * @param message the message to get the hash of
+	 * @return the resulting hash
+	 */
 	public synchronized byte[] getHash(byte[] message) {
 		
 		Pointer msgPointer = new Memory(message.length);
@@ -35,6 +43,9 @@ public class RandomX_VM {
 		return pointer;
 	}
 	
+	/**
+	 * Destroy this VM
+	 */
 	public void destroy() {
 		Bindings.INSTANCE.randomx_destroy_vm(pointer);
 		parent.vms.remove(this);
